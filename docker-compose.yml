@@ -1,0 +1,43 @@
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: opteamus-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: opteamus
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  backend:
+    build:
+      context: ./Backend/OpTeamUs
+      dockerfile: OpTeamUs/Dockerfile
+    container_name: opteamus-api
+    depends_on:
+      - postgres
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=opteamus;Username=postgres;Password=postgres
+    ports:
+      - "8080:8080"
+
+
+  frontend:
+    build:
+      context: ./Frontend/OpTeamUs
+      dockerfile: Dockerfile
+    container_name: opteamus-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+
+volumes:
+  postgres_data:

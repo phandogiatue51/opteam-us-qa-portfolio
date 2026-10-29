@@ -1,0 +1,6 @@
+@OpTeamUs_HostAddress = http://localhost:5110
+
+GET {{OpTeamUs_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

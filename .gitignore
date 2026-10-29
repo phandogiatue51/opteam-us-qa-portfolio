@@ -1,0 +1,23 @@
+# Node
+node_modules
+dist
+npm-debug.log
+
+# .NET
+bin/
+obj/
+
+# Visual Studio
+.vs
+*.user
+*.suo
+
+# Environment
+.env
+
+# Docker
+postgres_data
+
+# OS
+.DS_Store
+Thumbs.db
