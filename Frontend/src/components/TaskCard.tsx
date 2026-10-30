@@ -1,7 +1,6 @@
 import { useState, memo } from "react";
 import { Trash2, MoreHorizontal, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -8,7 +8,6 @@ using OpTeamUs.Models;
 using OpTeamUs.Services;
 using System.Security.Claims;
 
-
 namespace OpTeamUs.Controllers
 {
 	[ApiController]
@@ -16,9 +15,7 @@ namespace OpTeamUs.Controllers
 	[Authorize]
 	public class TaskController : ControllerBase
 	{
-
 		private readonly AppDbContext _context;
-
 		private readonly WorkspaceAccessService _accessService;
 
 		public TaskController(AppDbContext context, WorkspaceAccessService accessService)
@@ -36,15 +33,6 @@ namespace OpTeamUs.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(CreateTaskRequest request)
 		{
-			//var project = await _context.Projects
-			//	.Include(p => p.Workspace)
-			//	.FirstOrDefaultAsync(p =>
-			//		p.Id == request.ProjectId &&
-			//		p.Workspace.OwnerId == GetCurrentUserId());
-
-			//if (project == null)
-			//	return Forbid();
-
 			var project = await _context.Projects.Include(p => p.Workspace).FirstOrDefaultAsync(p => p.Id == request.ProjectId);
 
 			if (project == null)
@@ -57,8 +45,6 @@ namespace OpTeamUs.Controllers
 
 			if (role == null)
 				return Forbid();
-
-
 
 			var taskItem = new TaskItem
 			{
@@ -80,7 +66,6 @@ namespace OpTeamUs.Controllers
 				CreatedAt = taskItem.CreatedAt
 			});
 		}
-
 		#endregion
 
 		#region GET Task Item
@@ -111,7 +96,6 @@ namespace OpTeamUs.Controllers
 
 			return Ok(tasks);
 		}
-
 		#endregion
 
 		#region Update task PUT
@@ -147,13 +131,11 @@ namespace OpTeamUs.Controllers
 		#endregion
 
 		#region Delete task DELETE
-
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(Guid id)
 		{
 			var task = await _context.Tasks
-				.Include(t => t.Project)
-				.ThenInclude(p => p.Workspace)
+				.Include(t => t.Project.Workspace)
 				.FirstOrDefaultAsync(t => t.Id == id);
 
 			if (task == null)
@@ -172,9 +154,6 @@ namespace OpTeamUs.Controllers
 
 			return NoContent();
 		}
-
 		#endregion
-
-
 	}
 }

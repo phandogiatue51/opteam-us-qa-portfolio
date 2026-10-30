@@ -69,7 +69,7 @@ const LandingPage = () => {
         <div className="animate-fade-in-up">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border dark:border-emerald-500/20 bg-card px-4 py-1.5 text-sm text-muted-foreground shadow-sm">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            Now in public beta
+            <span>Now in public beta</span>
           </div>
           <h1 className="text-5xl font-extrabold leading-tight tracking-tight text-foreground dark:text-emerald-50 dark-text-glow sm:text-6xl lg:text-7xl">
             Organize work.<br />Ship faster.<br />Stay aligned.
@@ -129,7 +129,7 @@ const LandingPage = () => {
               <CardContent className="p-6">
                 <div className="mb-3 flex gap-0.5">
                   {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <Star key={`${t.name}-star-${i}`} className="h-4 w-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
                 <p className="mb-4 text-sm leading-relaxed text-foreground">"{t.quote}"</p>
@@ -196,23 +196,23 @@ const LandingPage = () => {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
                 <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Changelog</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors">Changelog</a></li>
               </ul>
             </div>
             <div>
               <h5 className="mb-4 text-sm font-semibold text-foreground">Company</h5>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors">About</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors">Blog</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors">Careers</a></li>
               </ul>
             </div>
             <div>
               <h5 className="mb-4 text-sm font-semibold text-foreground">Legal</h5>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors">Privacy</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors">Terms</a></li>
+                <li><a href="#features" className="hover:text-foreground transition-colors">Security</a></li>
               </ul>
             </div>
           </div>

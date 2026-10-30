@@ -14,7 +14,6 @@ namespace OpTeamUs.Controllers
 	[Authorize]
 	public class MembershipController : ControllerBase
 	{
-
 		private readonly AppDbContext _context;
 
 		public MembershipController(AppDbContext context)
@@ -27,7 +26,7 @@ namespace OpTeamUs.Controllers
 			return Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 		}
 
-		#region Invite Memeber POST
+		#region Invite Member POST
 		[HttpPost("invite")]
 		public async Task<IActionResult> Invite(InviteMemberRequest request)
 		{
@@ -67,7 +66,7 @@ namespace OpTeamUs.Controllers
 		}
 		#endregion
 
-		#region GET Existing Memember
+		#region GET Existing Member
 		[HttpGet("workspace/{workspaceId}")]
 		public async Task<IActionResult> GetMembers(Guid workspaceId)
 		{
@@ -83,7 +82,6 @@ namespace OpTeamUs.Controllers
 
 			var members = await _context.WorkspaceMembers
 				.Where(m => m.WorkspaceId == workspaceId)
-				.Include(m => m.User)
 				.Select(m => new
 				{
 					m.User.Email,
@@ -95,6 +93,5 @@ namespace OpTeamUs.Controllers
 			return Ok(members);
 		}
 		#endregion
-
 	}
 }

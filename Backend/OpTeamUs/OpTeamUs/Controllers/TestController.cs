@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -11,6 +11,7 @@ namespace OpTeamUs.Controllers
 	{
 		// Public GET
 		[HttpGet("public")]
+		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
 		public IActionResult Public()
 		{
 			return Ok("This is a public endpoint.");
@@ -18,6 +19,7 @@ namespace OpTeamUs.Controllers
 
 		[Authorize]
 		[HttpGet("protected")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
 		public IActionResult Protected()
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -34,11 +36,10 @@ namespace OpTeamUs.Controllers
 		// Authorized GET
 		[Authorize(Roles = "Admin")]
 		[HttpGet("admin-only")]
+		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
 		public IActionResult AdminOnly()
 		{
 			return Ok("You are an Admin.");
 		}
-
-
 	}
 }

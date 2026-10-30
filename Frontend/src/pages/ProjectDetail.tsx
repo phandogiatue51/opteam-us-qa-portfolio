@@ -12,14 +12,12 @@ const STATUS_ORDER: TaskStatus[] = ["todo", "in-progress", "done"];
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchTasks = () => {
     if (!id) return;
     getTasks(id)
       .then(setTasks)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(() => {});
   };
 
   useEffect(() => { fetchTasks(); }, [id]);

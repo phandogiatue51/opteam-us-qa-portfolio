@@ -14,18 +14,24 @@ const ProfilePage = () => {
       .catch(() => setError(true));
   }, []);
 
+  const renderContent = () => {
+    if (error) {
+      return <p className="text-destructive">Failed to load user profile.</p>;
+    }
+    if (!profile) {
+      return (
+        <div className="w-full max-w-lg space-y-4">
+          <Skeleton className="h-48 w-full rounded-lg" />
+        </div>
+      );
+    }
+    return <ProfileCard profile={profile} />;
+  };
+
   return (
     <AppLayout>
       <div className="flex flex-1 items-start justify-center pt-12">
-        {error ? (
-          <p className="text-destructive">Failed to load user profile.</p>
-        ) : !profile ? (
-          <div className="w-full max-w-lg space-y-4">
-            <Skeleton className="h-48 w-full rounded-lg" />
-          </div>
-        ) : (
-          <ProfileCard profile={profile} />
-        )}
+        {renderContent()}
       </div>
     </AppLayout>
   );
