@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -18,21 +18,25 @@ namespace OpTeamUs.Services
 		public string GenerateToken(User user)
 		{
 			var jwtSettings = _configuration.GetSection("Jwt");
+			var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+				?? _configuration["Jwt:Key"];
+
+			if (string.IsNullOrWhiteSpace(secretKey))
+			{
+				secretKey = "DefaultInsecureDevSecretKeyMustBe32Bytes!";
+			}
 
 			var key = new SymmetricSecurityKey(
-				Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
+				Encoding.UTF8.GetBytes(secretKey)
 			);
 
 			var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
 			var claims = new[]
 			{
-				//new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-				//new Claim(JwtRegisteredClaimNames.Email, user.Email)
 				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
 				new Claim(ClaimTypes.Email, user.Email),
 				new Claim(ClaimTypes.Role, user.Role)
-
 			};
 
 			var token = new JwtSecurityToken(
@@ -40,13 +44,12 @@ namespace OpTeamUs.Services
 				audience: jwtSettings["Audience"],
 				claims: claims,
 				expires: DateTime.UtcNow.AddMinutes(
-					int.Parse(jwtSettings["ExpiryMinutes"]!)
+					int.Parse(jwtSettings["ExpiryMinutes"] ?? "60")
 				),
 				signingCredentials: credentials
 			);
 
 			return new JwtSecurityTokenHandler().WriteToken(token);
 		}
-
 	}
 }

@@ -25,6 +25,13 @@ builder.Services.AddCors(options =>
 				  .AllowAnyHeader()
 				  .AllowAnyMethod();
 		});
+
+	options.AddPolicy("FrontendPolicy", policy =>
+	{
+		policy.WithOrigins("http://localhost:8081")
+			  .AllowAnyHeader()
+			  .AllowAnyMethod();
+	});
 });
 
 
@@ -57,24 +64,28 @@ builder.Services.AddSwaggerGen(options =>
 	});
 });
 
-// CORS Policy (VERY IMPORTANT)
-builder.Services.AddCors(options =>
-{
-	options.AddPolicy("FrontendPolicy", policy =>
-	{
-		policy.WithOrigins("http://localhost:8081")
-			  .AllowAnyHeader()
-			  .AllowAnyMethod();
-	});
-});
-
 // Database
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+	connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+		?? "Host=localhost;Port=5432;Database=teamopsdb;Username=teamops";
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-	options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+	options.UseNpgsql(connectionString));
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+	?? builder.Configuration["Jwt:Key"];
+
+if (string.IsNullOrWhiteSpace(secretKey))
+{
+	secretKey = "DefaultInsecureDevSecretKeyMustBe32Bytes!";
+}
+
+var key = Encoding.UTF8.GetBytes(secretKey);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(options =>
@@ -85,8 +96,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			ValidateAudience = true,
 			ValidateLifetime = true,
 			ValidateIssuerSigningKey = true,
-			ValidIssuer = jwtSettings["Issuer"],
-			ValidAudience = jwtSettings["Audience"],
+			ValidIssuer = jwtSettings["Issuer"] ?? "TeamOps",
+			ValidAudience = jwtSettings["Audience"] ?? "TeamOpsUsers",
 			IssuerSigningKey = new SymmetricSecurityKey(key)
 		};
 	});
@@ -109,7 +120,6 @@ var app = builder.Build();
 
 app.UseRouting();
 
-//app.UseCors("FrontendPolicy");   // MUST BE HERE
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
@@ -136,18 +146,18 @@ if (!app.Environment.IsEnvironment("Testing"))
 		{
 			try
 			{
-				dbContext.Database.Migrate();
+				await dbContext.Database.MigrateAsync();
 				break;
 			}
 			catch
 			{
 				retries--;
-				Thread.Sleep(3000);
+				await Task.Delay(3000);
 			}
 		}
 	}
 }
 
-app.Run();
+await app.RunAsync();
 
 public partial class Program { }
