@@ -18,13 +18,8 @@ namespace OpTeamUs.Services
 		public string GenerateToken(User user)
 		{
 			var jwtSettings = _configuration.GetSection("Jwt");
-			var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
-				?? _configuration["Jwt:Key"];
-
-			if (string.IsNullOrWhiteSpace(secretKey))
-			{
-				secretKey = "DefaultInsecureDevSecretKeyMustBe32Bytes!";
-			}
+			var secretKey = jwtSettings["Key"] 
+				?? throw new InvalidOperationException("JWT Key is not configured in appsettings.json.");
 
 			var key = new SymmetricSecurityKey(
 				Encoding.UTF8.GetBytes(secretKey)

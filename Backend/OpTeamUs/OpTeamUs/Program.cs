@@ -77,12 +77,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
-	?? builder.Configuration["Jwt:Key"];
+var secretKey = builder.Configuration["Jwt:Key"];
 
 if (string.IsNullOrWhiteSpace(secretKey))
 {
-	secretKey = "DefaultInsecureDevSecretKeyMustBe32Bytes!";
+	throw new InvalidOperationException("JWT Secret Key is not configured. Please set 'Jwt:Key' in configuration or environment variables.");
 }
 
 var key = Encoding.UTF8.GetBytes(secretKey);
