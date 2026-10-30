@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -41,10 +41,10 @@ namespace OpTeamUs.Controllers
 				.GetUserRoleInWorkspace(userId, request.WorkspaceId);
 
 			if (role == null)
-				return Forbid("Not a member of this workspace.");
+				return Forbid();
 
 			if (role == "Member")
-				return Forbid("Members cannot create projects.");
+				return Forbid();
 
 			var project = new Project
 			{
@@ -77,7 +77,7 @@ namespace OpTeamUs.Controllers
 					w.OwnerId == GetCurrentUserId());
 
 			if (workspace == null)
-				return Forbid("You do not own this workspace.");
+				return Forbid();
 
 			var projects = await _context.Projects
 				.Where(p => p.WorkspaceId == workspaceId)

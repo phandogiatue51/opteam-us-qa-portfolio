@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +37,7 @@ namespace OpTeamUs.Controllers
 					w.OwnerId == GetCurrentUserId());
 
 			if (workspace == null)
-				return Forbid("Only workspace owner can invite members.");
+				return Forbid();
 
 			var user = await _context.Users
 				.FirstOrDefaultAsync(u => u.Email == request.Email);
@@ -79,7 +79,7 @@ namespace OpTeamUs.Controllers
 					m.UserId == userId);
 
 			if (!isMember)
-				return Forbid("You are not a member of this workspace.");
+				return Forbid();
 
 			var members = await _context.WorkspaceMembers
 				.Where(m => m.WorkspaceId == workspaceId)

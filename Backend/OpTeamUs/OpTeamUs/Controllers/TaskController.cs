@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +43,7 @@ namespace OpTeamUs.Controllers
 			//		p.Workspace.OwnerId == GetCurrentUserId());
 
 			//if (project == null)
-			//	return Forbid("You do not own this project.");
+			//	return Forbid();
 
 			var project = await _context.Projects.Include(p => p.Workspace).FirstOrDefaultAsync(p => p.Id == request.ProjectId);
 
@@ -56,7 +56,7 @@ namespace OpTeamUs.Controllers
 				.GetUserRoleInWorkspace(userId, project.WorkspaceId);
 
 			if (role == null)
-				return Forbid("Not a member of this workspace.");
+				return Forbid();
 
 
 
@@ -94,7 +94,7 @@ namespace OpTeamUs.Controllers
 					p.Workspace.OwnerId == GetCurrentUserId());
 
 			if (project == null)
-				return Forbid("You do not own this project.");
+				return Forbid();
 
 			var tasks = await _context.Tasks
 				.Where(t => t.ProjectId == projectId)
@@ -165,7 +165,7 @@ namespace OpTeamUs.Controllers
 				.GetUserRoleInWorkspace(userId, task.Project.WorkspaceId);
 
 			if (role == null)
-				return Forbid("Not authorized in this workspace.");
+				return Forbid();
 
 			_context.Tasks.Remove(task);
 			await _context.SaveChangesAsync();

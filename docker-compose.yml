@@ -1,3 +1,4 @@
+
 services:
 
   postgres:
@@ -16,8 +17,8 @@ services:
 
   backend:
     build:
-      context: ./Backend
-      dockerfile: Dockerfile
+      context: ./Backend/OpTeamUs
+      dockerfile: OpTeamUs/Dockerfile
     container_name: opteamus-api
     depends_on:
       - postgres
@@ -29,7 +30,7 @@ services:
 
   frontend:
     build:
-      context: ./Frontend
+      context: ./Frontend/OpTeamUs
       dockerfile: Dockerfile
     container_name: opteamus-frontend
     depends_on:

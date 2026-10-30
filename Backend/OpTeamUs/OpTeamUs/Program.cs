@@ -124,25 +124,30 @@ app.MapControllers();
 // AUTO MIGRATIONS
 // ===============================
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
-	var services = scope.ServiceProvider;
-	var dbContext = services.GetRequiredService<AppDbContext>();
-
-	var retries = 10;
-	while (retries > 0)
+	using (var scope = app.Services.CreateScope())
 	{
-		try
+		var services = scope.ServiceProvider;
+		var dbContext = services.GetRequiredService<AppDbContext>();
+
+		var retries = 10;
+		while (retries > 0)
 		{
-			dbContext.Database.Migrate();
-			break;
-		}
-		catch
-		{
-			retries--;
-			Thread.Sleep(3000);
+			try
+			{
+				dbContext.Database.Migrate();
+				break;
+			}
+			catch
+			{
+				retries--;
+				Thread.Sleep(3000);
+			}
 		}
 	}
 }
 
 app.Run();
+
+public partial class Program { }
