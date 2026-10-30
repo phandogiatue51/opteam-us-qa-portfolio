@@ -19,7 +19,7 @@ namespace OpTeamUs.Controllers
 
 		[Authorize]
 		[HttpGet("protected")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
 		public IActionResult Protected()
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
