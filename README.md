@@ -7,7 +7,7 @@
 
 This repository contains the Quality Assurance (QA) testing portfolio for **OpTeamUs**, an open-source full-stack Kanban project and task management platform.
 
-*Huge thanks to [CallynN](https://github.com/CallynN) for building the original OpTeamUs application (ASP.NET Core 8, React, PostgreSQL, and Docker) which provided the foundation for this testing project.*
+*Huge thanks to [CallynN](https://github.com/CallynN) for building the original [OpTeamUs](https://github.com/CallynN/OpTeamUs) application (ASP.NET Core 8, React, PostgreSQL, and Docker) which provided the foundation for this testing project.*
 
 ---
 
@@ -47,14 +47,27 @@ This QA portfolio demonstrates a **4-Layer Multi-Tier Testing Strategy** spannin
 
 ## Repository Structure
 
-- `Backend/OpTeamUs/OpTeamUs.Tests/` - xUnit test project containing 43 unit and integration tests.
-- `postman/` - Contains the exported Postman Collection (v2.1).
-- `Frontend/tests/` - Contains the Playwright UI automation code (`e2e.spec.ts`).
-- `evidence/` - Screenshots of Postman test failures, SQL database verification, and the Playwright HTML report.
-- `test-plan.md` - Master test strategy, test matrix, and environment details.
-- `bug-reports.md` - Detailed defect reports found during testing.
-- `.github/workflows/sonarcloud.yml` - GitHub Actions workflow for automated test execution and SonarCloud analysis.
-- `sonar-project.properties` - SonarCloud configuration and coverage rule definitions.
+```
+phandogiatue51/opteam-us-qa-portfolio/
+├── docs/
+│   ├── test-plan.md               # Master QA test plan, scope, strategy, and risk analysis
+│   ├── test-cases.md              # Functional & edge-case matrices with traceability IDs
+│   ├── test-summary-report.md     # Pass/fail metrics, coverage, and release sign-off
+│   └── bug-reports/               # Realistic issue tickets with root cause analysis & evidence
+│       ├── README.md              # Bug tracker index & defect breakdown matrix
+│       ├── BUG-001-...md          # 500 error on missing resource
+│       ├── BUG-002-...md          # Empty string validation bypass
+│       ├── BUG-003-...md          # PUT task title & description data loss
+│       ├── BUG-004-...md          # Missing member FK validation
+│       └── evidence/              # Screenshots of failures, SQL verification & reports
+├── tests/
+│   ├── api/                       # Postman v2.1 automated collection with E2E chaining
+│   └── e2e/                       # Playwright TypeScript UI automation suite
+├── Backend/                       # ASP.NET Core 8 Web API & OpTeamUs.Tests (xUnit)
+├── Frontend/                      # React, Vite, TailwindCSS application & Playwright config
+├── .github/workflows/             # GitHub Actions CI & SonarCloud pipeline
+└── sonar-project.properties       # SonarCloud scanner configuration & coverage rules
+```
 
 ---
 
@@ -90,10 +103,10 @@ Wait for the frontend (`http://localhost:3000`) and backend (`http://localhost:8
 
 ### 3. Run the API Tests (Postman)
 
-1. Import the `postman/OpTeamUs.postman_collection.json` file into Postman.
+1. Import `tests/api/OpTeamUs.postman_collection.json` into Postman.
 2. Click the three dots (`...`) next to the collection name, select **Run Collection**, and click **Run**.
 
-*(Note: Running the collection will execute a full E2E API flow and surface the known backend bugs documented in `bug-reports.md`).*
+*(Note: Running the collection will execute a full E2E API flow and surface the known backend bugs documented in [`docs/bug-reports/`](docs/bug-reports/README.md)).*
 
 ---
 
