@@ -22,7 +22,7 @@ services:
     depends_on:
       - postgres
     environment:
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=opteamus;Username=postgres;Password=postgres
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=opteamus;Username=postgres;Password=postgres;Maximum Pool Size=80;Minimum Pool Size=5;Connection Idle Lifetime=30;Timeout=15;Command Timeout=30;
       Jwt__Key: DefaultInsecureDevSecretKeyMustBe32Bytes!
     ports:
       - "8080:8080"

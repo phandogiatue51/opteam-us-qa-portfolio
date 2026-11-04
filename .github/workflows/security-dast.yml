@@ -1,0 +1,126 @@
+name: OWASP ZAP DAST Security Scan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  # -------------------------------------------------------------
+  # OWASP ZAP Dynamic Application Security Testing (DAST)
+  # -------------------------------------------------------------
+  owasp-zap-dast:
+    name: OWASP ZAP DAST Pipeline
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: opteamus
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Start ASP.NET Core Backend
+        env:
+          ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=opteamus;Username=postgres;Password=postgres"
+          Jwt__Key: "DefaultInsecureDevSecretKeyMustBe32Bytes!"
+          Jwt__Issuer: "TeamOps"
+          Jwt__Audience: "TeamOpsUsers"
+          ASPNETCORE_ENVIRONMENT: "Development"
+        run: |
+          dotnet run --project Backend/OpTeamUs/OpTeamUs/OpTeamUs.csproj --urls "http://0.0.0.0:8080" &
+          
+          echo "Waiting for ASP.NET Core API and OpenAPI Swagger definition..."
+          timeout 45 bash -c 'until curl -s http://127.0.0.1:8080/swagger/v1/swagger.json > /dev/null; do sleep 1; done'
+          echo "ASP.NET Core Backend is online and serving OpenAPI specification!"
+
+      - name: Generate DAST Bearer Token
+        id: auth
+        env:
+          API_BASE_URL: "http://127.0.0.1:8080"
+          DAST_USER_EMAIL: "zap_scanner@example.com"
+          DAST_USER_PASSWORD: "ZapScannerPass123!"
+        run: |
+          node tests/security/auth-hook.js "http://127.0.0.1:8080"
+
+      - name: Prepare Report Output Directory
+        run: |
+          mkdir -p zap-reports
+          chmod -R 777 zap-reports
+
+      - name: Execute OWASP ZAP API Scan
+        continue-on-error: true
+        env:
+          ZAP_AUTH_HEADER: "Authorization"
+          ZAP_AUTH_HEADER_VALUE: ${{ env.ZAP_AUTH_HEADER_VALUE }}
+        run: |
+          docker run --rm --network="host" \
+            -v "${{ github.workspace }}:/zap/wrk/:rw" \
+            -e ZAP_AUTH_HEADER="Authorization" \
+            -e ZAP_AUTH_HEADER_VALUE="${{ env.ZAP_AUTH_HEADER_VALUE }}" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py \
+            -t "http://127.0.0.1:8080/swagger/v1/swagger.json" \
+            -f openapi \
+            -c "/zap/wrk/tests/security/zap-api-scan.conf" \
+            -r "/zap/wrk/zap-reports/zap-report.html" \
+            -J "/zap/wrk/zap-reports/zap-report.json" \
+            -w "/zap/wrk/zap-reports/zap-report.md" \
+            -I
+
+      - name: Convert ZAP JSON Report to SARIF
+        if: always()
+        run: |
+          node tests/security/zap-to-sarif.js \
+            zap-reports/zap-report.json \
+            zap-reports/zap-report.sarif \
+            Backend/swagger.json
+
+      - name: Upload SARIF to GitHub Security Tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: zap-reports/zap-report.sarif
+          category: owasp-zap-dast
+        continue-on-error: true
+
+      - name: Upload ZAP DAST Scan Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-dast-security-reports
+          path: |
+            zap-reports/zap-report.html
+            zap-reports/zap-report.json
+            zap-reports/zap-report.md
+            zap-reports/zap-report.sarif
+          retention-days: 14
