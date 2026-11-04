@@ -1,1 +1,76 @@
+name: Performance & Concurrency Testing (k6)
 
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'tests/performance/**'
+      - '.github/workflows/performance-tests.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'tests/performance/**'
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Performance scenario to run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - load
+          - stress
+          - concurrency-db
+
+jobs:
+  k6-test:
+    name: Run k6 Performance Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: opteamus
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Start ASP.NET Core Backend
+        env:
+          ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=opteamus;Username=postgres;Password=postgres"
+          Jwt__Key: "DefaultInsecureDevSecretKeyMustBe32Bytes!"
+          Jwt__Issuer: "TeamOps"
+          Jwt__Audience: "TeamOpsUsers"
+          ASPNETCORE_ENVIRONMENT: "Development"
+        run: |
+          dotnet run --project Backend/OpTeamUs/OpTeamUs/OpTeamUs.csproj --urls "http://127.0.0.1:8080" &
+          timeout 30 bash -c 'until curl -s http://127.0.0.1:8080/swagger/v1/swagger.json > /dev/null; do sleep 1; done'
+          echo "API is ready!"
+
+      - name: Run k6 Test
+        env:
+          API_BASE_URL: "http://127.0.0.1:8080"
+        run: |
+          SCENARIO="${{ inputs.scenario || 'smoke' }}"
+          echo "Executing scenario: $SCENARIO"
+          k6 run "tests/performance/scenarios/${SCENARIO}.js"
